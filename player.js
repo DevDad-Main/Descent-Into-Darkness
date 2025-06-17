@@ -1,3 +1,5 @@
+import { HelperUtilities } from "./utils.js";
+
 export class Player {
   #level = 1;
   constructor({
@@ -12,6 +14,9 @@ export class Player {
     mana,
     equipment,
     items,
+    stealableItems,
+    stealableWeapons,
+    stealableMagicItems,
     gold,
     xp,
     back,
@@ -37,6 +42,9 @@ export class Player {
       mana,
       equipment,
       items,
+      stealableItems,
+      stealableWeapons,
+      stealableMagicItems,
       gold,
       xp,
       back,
@@ -133,13 +141,91 @@ export class Player {
    * Basic melee attack for all classes.
    * @param {object} enemy - The Players current attackable enemy
    */
-  melee_attack(enemy) {}
+  melee_attack(enemy) {
+    let attack = 2 + this.strength + Math.round(this.stamina * Math.random());
+    let damage = Math.round(Math.random() * (this.stamina / 2)) + this.strength;
+    if (attack >= enemy.accuracy) {
+      prompt(
+        `\n${this.name} strikes ${enemy.name} with their ${this.weapon} for ${damage} damage!`,
+      );
+      enemy.hp -= damage;
+    } else {
+      console.log(`\n${this.name} missed!`);
+    }
+  }
 
   /**
    * Handles additional options for thieves in combat.
    * @param {object} enemy - Potential encounter when thieiving.
    */
-  thievery(enemy) {}
+  thievery(enemy) {
+    this.back = false;
+    while (true) {
+      let choice = prompt(`\n[Steal] | [Backstab] | [Back] -> `).toLowerCase();
+      if (choice === "back") {
+        this.back = true;
+        break;
+      } else if (choice === "steal") {
+        if (Math.floor(Math.random() * 10) > 2) {
+          // let lootType = Math.floor(Math.random() * 100) + 1;
+          let lootType = HelperUtilities.getRandomInt(1, 100);
+          if (lootType > 65) {
+            let gold = HelperUtilities.getRandomInt(1, 15);
+            this.gold += gold;
+            prompt(`\nYou have successfully stolen ${gold} gold!`);
+            break;
+          } else if (lootType > 16 && lootType < 65) {
+            let randomItem = HelperUtilities.getRandomItemFromArray(
+              this.stealableItems,
+            );
+            prompt(`\nYou have successfully stolen ${randomItem}!`);
+            this.items.push(randomItem);
+            break;
+          } else if (lootType > 0 && lootType < 15) {
+            let randomItem = HelperUtilities.getRandomItemFromArray(
+              this.stealableWeapons,
+            );
+            prompt(`\nYou have successfully stolen ${randomItem}!`);
+            this.equipment.push(randomItem);
+            break;
+          } else {
+            let randomItem = HelperUtilities.getRandomItemFromArray(
+              this.stealableMagicItems,
+            );
+            prompt(`\nYou have successfully stolen ${randomItem}!`);
+            this.equipment.push(randomItem);
+            break;
+          }
+        } else {
+          prompt(`\nThe creature catches you rifling through it's things!`);
+          break;
+        }
+      } else if (choice === "backstab") {
+        if (this.special < 1) {
+          prompt(`\nYou are too exhausted to attempt another backstab!`);
+        } else {
+          prompt(`You attempt to maneuver behind the creature...`);
+          let attack =
+            5 + this.strength + Math.round(this.stamina * Math.random());
+          let damage =
+            Math.round(Math.random() * (this.stamina / 2)) + this.strength + 10;
+
+          if (attack >= enemy.accuracy) {
+            prompt(
+              `\n${this.name} backstabs ${enemy.name} with their ${this.weapon} for ${damage} damage!`,
+            );
+            enemy.hp -= damage;
+            this.special -= 1;
+            break;
+          } else {
+            console.log(`\n${this.name} missed!`);
+            this.special -= 1;
+            break;
+          }
+        }
+      }
+    }
+  }
 
   /**
    * Spells menu that only mages have access to.
