@@ -231,5 +231,140 @@ export class Player {
    * Spells menu that only mages have access to.
    * @param {object} enemy - Enemy encounter when in combat
    */
-  spells(enemy) {}
+  spells(enemy) {
+    this.back = false;
+    while (true) {
+      console.log(
+        `\n[Heal | 4 MP]| [Fireball | 7 MP] | [Stun | 10 MP] | [Back] -> `,
+      );
+      console.log(`MP: ${this.mana}`);
+      let choice = prompt(`Select Spell -> `).toLowerCase();
+      if (choice === "back") {
+        this.back = true;
+        break;
+      } else if (choice === "heal") {
+        if (this.mana < 4) {
+          console.log(
+            "You do not have enough Mana Points to cast the Heal spell!",
+          );
+        } else {
+          this.hp += 5;
+          this.mana -= 4;
+          if (this.hp > this.max_hp) this.hp = this.max_hp;
+          console.log(`\n${this.name} casts Heal and reqains 8 HP!`);
+          break;
+        }
+      } else if (choice === "fireball") {
+        if (!this.combat) {
+          prompt("\nNothing to cast fireball on! -> ");
+        } else if (this.mana < 7) {
+          console.log("You do not have enough Mana Points to cast Fireball!");
+        } else {
+          this.mana -= 7;
+          let spellDamage = HelperUtilities.getRandomInt(12, 15);
+          enemy.hp -= spellDamage;
+          console.log(
+            `\n${this.name} casts Fireball and ${enemy.name} takes ${spellDamage} damage!`,
+          );
+          break;
+        }
+      } else if (choice === "stun") {
+        if (!this.combat) {
+          console.log("\nNothing to cast Stun on! -> ");
+        } else if (this.mana < 5) {
+          console.log("You do not have enough Mana Points to cast Stun!");
+        } else {
+          this.mana -= 10;
+          enemy.stunned = 2;
+          prompt(
+            `\n${this.name} casts Stun!. ${enemy.name}'s eyes glaze over...`,
+          );
+          break;
+        }
+      }
+    }
+  }
+
+  /**
+   * First layer of inventory fucntionality. Displays a list of items
+   * currently in inventory and actions that can be perfomed wih them.
+   */
+  inventory() {
+    this.back = false;
+    while (true) {
+      if (this.equipment.length < 1 && this.items < 1 && this.gold < 1) {
+        //NOTE: Well your poor.
+        console.log(`\nYou are not currently carrying anything.`);
+      } else {
+        console.log("\n////////////////////////////");
+        console.log("You are currently carrying...");
+        console.log("\nEquipment:");
+        for (const item of this.equipment) {
+          console.log(item.name);
+        }
+        console.log(`\nItems:`);
+        if (this.items < 1) {
+          console.log(`You are not currently carrying any items`);
+        } else {
+          for (const item of this.items) {
+            console.log(item.name);
+          }
+        }
+        console.log(`\nGold: ${this.gold}`);
+      }
+      let choice = prompt(
+        `\n[Equip] | [Use] | [Inspect] | [Back] -> `,
+      ).toLowerCase();
+
+      if (choice === "equip") {
+        this.changeEquipment();
+        if (this.back) {
+          continue;
+        } else {
+          break;
+        }
+      } else if (choice === "use") {
+        if (this.combat) {
+          this.used_item = true;
+          break;
+        } else if (!this.combat) {
+          this.useItem(null);
+        }
+      } else if (choice === "inspect") {
+        this.inspect();
+        continue;
+      } else if (choice === "back") {
+        this.back = true;
+        break;
+      } else {
+        continue;
+      }
+    }
+  }
+
+  /**
+   * Handles the [Equip] option from the first inventory menu.
+   */
+  changeEquipment() {
+    this.back = false;
+    while (true) {
+      console.log("\nEquipment:");
+      this.equipment.forEach((item, index) => {
+        console.log(`${index}. ${item.name}`);
+        try {
+          let choice = prompt(
+            `\nSelect an item with the corresponding number or [Back] -> `,
+          ).toLowerCase();
+
+          if (choice === "back") {
+            this.back = true;
+            return;
+          }
+          let intChoice = parseInt(choice);
+        } catch (error) {
+          console.log(`Error accesing Value: ${error}`);
+        }
+      });
+    }
+  }
 }
