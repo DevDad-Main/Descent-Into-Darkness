@@ -1,44 +1,17 @@
-import { HelperUtilities } from "./utils.js";
+import HelperUtilities from "./utils.js";
 
-export class Player {
+class Player {
   #level = 1;
-  constructor({
-    name,
-    player_class,
-    max_hp,
-    hp,
-    strength,
-    accuracy,
-    stamina,
-    max_mana,
-    mana,
-    equipment,
-    items,
-    stealableItems,
-    stealableWeapons,
-    stealableMagicItems,
-    gold,
-    xp,
-    back,
-    used_item,
-    weapon,
-    armour,
-    combat,
-    special,
-    room,
-  }) {
-    if (!name || !player_class) {
-      throw new Error("Missing required player properties");
-    }
-    Object.assign(this, {
+  constructor(config = {}) {
+    const {
       name,
-      player_class,
-      max_hp,
+      playerClass,
+      maxHp,
       hp,
       strength,
       accuracy,
       stamina,
-      max_mana,
+      maxMana,
       mana,
       equipment,
       items,
@@ -48,13 +21,91 @@ export class Player {
       gold,
       xp,
       back,
-      used_item,
+      usedItem,
+      weapon,
+      armour,
+      combat,
+      special,
+      room,
+    } = config;
+    // Object.assign(this, {
+    //   name,
+    //   playerClass,
+    //   maxHp,
+    //   hp,
+    //   strength,
+    //   accuracy,
+    //   stamina,
+    //   maxMana,
+    //   mana,
+    //   equipment,
+    //   items,
+    //   stealableItems,
+    //   stealableWeapons,
+    //   stealableMagicItems,
+    //   gold,
+    //   xp,
+    //   back,
+    //   usedItem,
+    //   weapon,
+    //   armour,
+    //   combat,
+    //   special,
+    //   room,
+    // });
+    HelperUtilities.validateInputs({
+      name,
+      playerClass,
+      maxHp,
+      hp,
+      strength,
+      accuracy,
+      stamina,
+      maxMana,
+      mana,
+      equipment,
+      items,
+      stealableItems,
+      stealableWeapons,
+      stealableMagicItems,
+      gold,
+      xp,
+      back,
+      usedItem,
       weapon,
       armour,
       combat,
       special,
       room,
     });
+
+    Object.assign(this, config);
+    // HelperUtilities.validateInputs({
+    //   name,
+    //   playerClass,
+    //   maxHp,
+    //   hp,
+    //   strength,
+    //   accuracy,
+    //   stamina,
+    //   maxMana,
+    //   mana,
+    //   equipment,
+    //   items,
+    //   stealableItems,
+    //   stealableWeapons,
+    //   stealableMagicItems,
+    //   gold,
+    //   xp,
+    //   back,
+    //   usedItem,
+    //   weapon,
+    //   armour,
+    //   combat,
+    //   special,
+    //   room,
+    // });
+    //
     /*//NOTE: REMINDER
       //NOTE: I pass one object with named properties when creating the player.
       //NOTE: The constructor({ ... }) pulls out those properties using destructuring.
@@ -325,7 +376,7 @@ export class Player {
         }
       } else if (choice === "use") {
         if (this.combat) {
-          this.used_item = true;
+          this.usedItem = true;
           break;
         } else if (!this.combat) {
           this.useItem(null);
@@ -351,20 +402,152 @@ export class Player {
       console.log("\nEquipment:");
       this.equipment.forEach((item, index) => {
         console.log(`${index}. ${item.name}`);
-        try {
-          let choice = prompt(
-            `\nSelect an item with the corresponding number or [Back] -> `,
+      });
+      try {
+        let choice = prompt(
+          `\nSelect an item with the corresponding number or [Back] -> `,
+        ).toLowerCase();
+
+        if (choice === "back") {
+          this.back = true;
+          break;
+        }
+        let intChoice = parseInt(choice);
+        if (
+          this.weapon === this.equipment[intChoice].name ||
+          this.armour === this.equipment[intChoice].name
+        ) {
+          let confirm = prompt(
+            `Would you like to unequip the ${this.equipment[intChoice].name} -> `,
           ).toLowerCase();
 
-          if (choice === "back") {
-            this.back = true;
-            return;
+          if (confirm === "yes") {
+            this.equipment[intChoice].unequip();
+            break;
           }
-          let intChoice = parseInt(choice);
-        } catch (error) {
-          console.log(`Error accesing Value: ${error}`);
+        } else {
+          let confirm = prompt(
+            `Would you like to equip the ${this.equipment[intChoice].name}? -> `,
+          ).toLowerCase();
+          if (confirm === "yes") {
+            this.equipment[intChoice].equip();
+            break;
+          }
         }
-      });
+      } catch (error) {
+        console.log(`Error accesing Value: ${error}`);
+        continue;
+      }
     }
   }
+
+  /**
+   * Handles the [Use] from the first Inventory menu
+   * @param {object} enemy - Enemy encounter when in combat
+   */
+  useItem(enemy) {
+    this.usedItem = false;
+    this.back = false;
+    while (!this.usedItem) {
+      console.log(`\nItems:`);
+      this.items.forEach((item, index) => {
+        console.log(`${index}. ${item.name}`);
+      });
+      try {
+        let choice = prompt(
+          `\nSelect an item by it;s number or [Back] -> `,
+        ).toLowerCase();
+
+        if (choice === "back") {
+          this.back = true;
+          break;
+        }
+        let intChoice = parseInt(choice);
+        let itemChoice = this.items[intChoice];
+        let confirm = prompt(
+          `Wold you like to use ${this.items[intChoice].name}? -> `,
+        ).toLowerCase();
+        if (choice === "yes") {
+          //NOTE: These conditionals are figuring out if the item chosen
+          //NOTE: Will add HP/MANA to the player or deal damage to the enemy
+          if (itemChoice.manaToAdd === 0 && itemChoice.damage === 0) {
+            this.hp += itemChoice.hpToAdd;
+            if (this.hp > this.maxHp) {
+              this.hp = this.maxHp;
+            }
+            prompt(
+              `\n${this.name} uses the ${itemChoice.name} and regains ${itemChoice.hpToAdd} HP!`,
+            );
+
+            this.items.splice(intChoice, 1);
+            this.usedItem = true;
+          } else if (itemChoice.hpToAdd === 0 && itemChoice.damage === 0) {
+            this.mana += itemChoice.manaToAdd;
+            if (this.mana > this.maxMana) {
+              this.mana = this.maxMana;
+            }
+            prompt(
+              `\n${this.name} uses the ${itemChoice.name} an regains ${itemChoice.manaToAdd} MP!`,
+            );
+            this.items.splice(intChoice, 1);
+            this.usedItem = true;
+          } else if (itemChoice.hpToAdd === 0 && itemChoice.manaToAdd === 0) {
+            if (!this.combat) {
+              prompt(`\nNothing to use ${itemChoice.name} on!`);
+            } else {
+              prompt(
+                `\n${this.name} uses the ${itemChoice.name} on ${enemy.name} and deals ${itemChoice.damage} damage!`,
+              );
+              enemy.hp -= itemChoice.damage;
+              this.items.splice(intChoice, 1);
+              this.usedItem = true;
+            }
+          }
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+  }
+  /**
+   * Handles [Inspect] option from the Inventory menu. Displays an item's stats given
+   * its index in player.equipment
+   */
+  inspect() {
+    this.back = false;
+    console.log(`Equipment:`);
+    this.equipment.forEach((item, index) => {
+      console.log(`${index}. ${item.name}`);
+    });
+    while (true) {
+      try {
+        let choice = prompt(
+          `\nInspect an item by its number or [Back] -> `,
+        ).toLowerCase();
+        if (choice === "back") {
+          this.back = true;
+          break;
+        }
+        let intChoice = parseInt(choice);
+        let item = this.equipment[intChoice];
+        if (item?.attack != null) {
+          console.log(`\n${item.name}`);
+          console.log(`Attack: ${item.attack}`);
+          console.log(`Accuracy Penalty: ${item.accuracyPenalty}`);
+        } else {
+          console.log(`\n ${this.equipment[intChoice].name}`);
+          console.log(`Defence: ${this.equipment[intChoice].defence}`);
+        }
+      } catch (error) {
+        console.log(`\nChoose an item by its number.`);
+      }
+    }
+  }
+
+  /**
+   * Displays current player status (Stats, Items equipped etc)
+   */
+  status() {}
 }
+
+export default Player;
