@@ -108,11 +108,11 @@ class Player {
     // });
     //
     /*//NOTE: REMINDER
-      //NOTE: I pass one object with named properties when creating the player.
-      //NOTE: The constructor({ ... }) pulls out those properties using destructuring.
-      //NOTE: Object.assign(this, {...}) attaches all the variables to the new object instance quickly.
-      //NOTE: I can still validate required fields by checking their values.
-      //NOTE: Now we don't have to write out all the below, we can do the above in a cleaner fashion.
+      // I pass one object with named properties when creating the player.
+      // The constructor({ ... }) pulls out those properties using destructuring.
+      // Object.assign(this, {...}) attaches all the variables to the new object instance quickly.
+      // I can still validate required fields by checking their values.
+      // Now we don't have to write out all the below, we can do the above in a cleaner fashion.
      */
     // {this.name = name;
     // this.player_class = player_class;
@@ -368,7 +368,7 @@ class Player {
     this.back = false;
     while (true) {
       if (this.equipment.length < 1 && this.items < 1 && this.gold < 1) {
-        //NOTE: Well your poor.
+        // Well your poor.
         console.log(`\nYou are not currently carrying anything.`);
       } else {
         console.log("\n////////////////////////////");
@@ -587,7 +587,7 @@ class Player {
       console.log(`\n${this.name}'s status:`);
       console.log(`HP: ${this.hp}, MP: ${this.mana}`);
       console.log(`Strength: ${this.strength}, Stamina: ${this.stamina}`);
-      console.log(`AC: ${this.ac}`);
+      console.log(`AC: ${this.accuracy}`);
       console.log("\nEquipped:");
       this.weapon === ""
         ? console.log("Weapon: None")
@@ -628,9 +628,61 @@ class Player {
     this.back = false;
     while (true) {
       const flee_chance = HelperUtilities.getRandomInt(1, 10);
+      if (flee_chance > 4) {
+        prompt("\nYou scramble through the door behind you and flee! -> ");
+        prompt(
+          "\nYou find yourself in an unfamiliar room with one untried door. -> ",
+        );
+        //TODO: Room selector method
+        this.room_selector();
+      } else {
+        prompt("\nAs you turn to leave the monster blocks your exit!");
+        break;
+      }
     }
   }
+  //#endregion
 
+  //#region Level Up Method
+  /**
+   * Handles leveling up the player and increasing their stats
+   **/
+  levelUp() {
+    this.max_hp += 5;
+    this.strength += 2;
+    this.accuracy += 1;
+    this.stamina += 2;
+    this.maxMana += 5;
+    this.level += 1;
+    this.xp = 0;
+    prompt(`\n${this.name} has gained a level!`);
+  }
+  //#endregion
+
+  //#region Rest Method
+  /**
+   * Handles [Rest] option from main menu.
+   */
+  rest() {
+    let confirm = prompt(
+      "Are you sure you would like to rest? -> ",
+    ).toLowerCase();
+
+    if (confirm === "no") {
+      this.back = true;
+    } else {
+      const hours = HelperUtilities.getRandomInt(2, 6);
+      const manaRegained = hours * 3;
+      prompt(
+        `\nYou spread the threadbare bedroll from your backpack on the ground before you.
+        Moments after you lay down, you begin to doze off. ->`,
+      );
+      if (HelperUtilities.getRandomInt(0, 10) > 6) {
+        //TODO: Monster during rest method
+        this.monsterDuringRest();
+      }
+    }
+  }
   //#endregion
 }
 
