@@ -1,6 +1,7 @@
 import HelperUtilities from "./utils.js";
 
 class Player {
+  //#region Constructor
   #level = 1;
   constructor(config = {}) {
     const {
@@ -134,7 +135,9 @@ class Player {
     // this.special = special;
     // this.room = room; }
   }
+  //#endregion
 
+  //#region Getters and Setters
   /**
    * Getter property for accessing private player level;
    * @param {number} level - The players current level
@@ -155,7 +158,20 @@ class Player {
     }
     return (this.#level = value);
   }
+  //#endregion
 
+  //#region Get Xp To Next Level Method
+  /**
+   * Returns the amount of XP required to level up
+   * @returns {number} The amount of XP required to level up
+   */
+  #getXpToNextLevel() {
+    // Example: XP required increases each level
+    return 10 * this.level ** 2;
+  }
+  //#endregion
+
+  //#region Attack Method
   /**
    * Attack method for fighter class.
    * @param {object} enemy - The Players current attackable enemy
@@ -187,7 +203,9 @@ class Player {
       }
     }
   }
+  //#endregion
 
+  //#region Melee Attack Method
   /**
    * Basic melee attack for all classes.
    * @param {object} enemy - The Players current attackable enemy
@@ -204,7 +222,9 @@ class Player {
       console.log(`\n${this.name} missed!`);
     }
   }
+  //#endregion
 
+  //#region Thievery Method
   /**
    * Handles additional options for thieves in combat.
    * @param {object} enemy - Potential encounter when thieiving.
@@ -277,7 +297,9 @@ class Player {
       }
     }
   }
+  //#endregion
 
+  //#region Spells Method
   /**
    * Spells menu that only mages have access to.
    * @param {object} enemy - Enemy encounter when in combat
@@ -335,7 +357,9 @@ class Player {
       }
     }
   }
+  //#endregion
 
+  //#region Inventory Method
   /**
    * First layer of inventory fucntionality. Displays a list of items
    * currently in inventory and actions that can be perfomed wih them.
@@ -392,7 +416,9 @@ class Player {
       }
     }
   }
+  //#endregion
 
+  //#region Change Equipment Method
   /**
    * Handles the [Equip] option from the first inventory menu.
    */
@@ -440,7 +466,9 @@ class Player {
       }
     }
   }
+  //#endregion
 
+  //#region Use Item Method
   /**
    * Handles the [Use] from the first Inventory menu
    * @param {object} enemy - Enemy encounter when in combat
@@ -509,6 +537,9 @@ class Player {
       }
     }
   }
+  //#endregion
+
+  //#region Inspect Item Method
   /**
    * Handles [Inspect] option from the Inventory menu. Displays an item's stats given
    * its index in player.equipment
@@ -543,11 +574,64 @@ class Player {
       }
     }
   }
+  //#endregion
 
+  //#region Status Method
   /**
    * Displays current player status (Stats, Items equipped etc)
    */
-  status() {}
+  status() {
+    this.back = false;
+    while (true) {
+      console.log("\n////////////////////////////");
+      console.log(`\n${this.name}'s status:`);
+      console.log(`HP: ${this.hp}, MP: ${this.mana}`);
+      console.log(`Strength: ${this.strength}, Stamina: ${this.stamina}`);
+      console.log(`AC: ${this.ac}`);
+      console.log("\nEquipped:");
+      this.weapon === ""
+        ? console.log("Weapon: None")
+        : console.log(`${this.weapon.name}`);
+      this.armour === ""
+        ? console.log("Armor: None")
+        : console.log(`${this.armour.name}`);
+
+      console.log("\nItems:");
+
+      if (this.items.length < 1) {
+        console.log("You have no items.");
+      } else {
+        for (const item of this.items) {
+          console.log(item.name);
+        }
+      }
+      console.log(`\nLevel ${this.level} ${this.player_class}`);
+      console.log(`XP to next level: ${this.#getXpToNextLevel() - this.xp}`);
+
+      const choice = prompt("\n[Back] -> ");
+      if (choice && choice.toLowerCase() === "back") {
+        this.back = true;
+        break;
+      }
+
+      console.log("Invalid input. Please type 'back' to return.");
+    }
+  }
+  //#endregion
+
+  //#region Flee Method
+  /**
+   * Handles the [Flee] option from the combat menu. Randomly
+   * determines if the monster blocks your flight attempt.
+   */
+  flee() {
+    this.back = false;
+    while (true) {
+      const flee_chance = HelperUtilities.getRandomInt(1, 10);
+    }
+  }
+
+  //#endregion
 }
 
 export default Player;

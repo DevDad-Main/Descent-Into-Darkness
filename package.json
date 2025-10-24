@@ -1,0 +1,24 @@
+{
+  "name": "descent-into-darkness",
+  "version": "1.0.0",
+  "description": "terminal based rougelike written in Python and converted to JavaScript",
+  "main": "game-loop.js",
+  "scripts": {
+    "start": "node game-loop.js",
+    "dev": "nodemon game-loop.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DevDad-Main/Descent-Into-Darkness.git"
+  },
+  "author": "Oliver Metz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DevDad-Main/Descent-Into-Darkness/issues"
+  },
+  "homepage": "https://github.com/DevDad-Main/Descent-Into-Darkness#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
