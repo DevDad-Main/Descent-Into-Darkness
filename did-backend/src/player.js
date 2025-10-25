@@ -1,5 +1,31 @@
 import HelperUtilities from "./utils.js";
 
+export interface PlayerConfig {
+  name: string;
+  playerClass: string;
+  maxHp: number;
+  hp: number;
+  strength: number;
+  accuracy: number;
+  stamina: number;
+  maxMana: number;
+  mana: number;
+  equipment: string[];
+  items: string[];
+  stealableItems: string[];
+  stealableWeapons: string[];
+  stealableMagicItems: string[];
+  gold: number;
+  xp: number;
+  back: boolean;
+  usedItem: boolean;
+  weapon: string;
+  armour: string;
+  combat: boolean;
+  special: number;
+  room: string;
+}
+
 class Player {
   //#region Constructor
   #level = 1;

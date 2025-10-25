@@ -4,6 +4,7 @@
   "description": "terminal based rougelike written in Python and converted to JavaScript",
   "main": "game-loop.js",
   "scripts": {
+    "build": "tsc",
     "start": "node game-loop.js",
     "dev": "nodemon game-loop.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -19,6 +20,8 @@
   },
   "homepage": "https://github.com/DevDad-Main/Descent-Into-Darkness#readme",
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@types/node": "^24.9.1",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.9.3"
   }
 }
