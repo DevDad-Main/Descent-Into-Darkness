@@ -1,4 +1,5 @@
 import { TerminalLine } from "../components/Terminal";
+import Player from "../../../did-backend/src/player.js";
 
 export class GameEngine {
   private lines: TerminalLine[] = [];
@@ -9,13 +10,32 @@ export class GameEngine {
     maxHealth: number;
     inCombat: boolean;
     enemy?: { name: string; health: number };
+    player?: Player;
   };
+
+  player: Player;
+
+  io: {
+    output: (text: string, type?: TerminalLine["type"]) => void;
+    input: (promptText: string) => Promise<string>;
+  };
+
+  awaitingInput: ((input: string) => void) | null = null;
 
   constructor(savedState?: any) {
     if (savedState) {
-      this.gameState = savedState;
+      this.player = new Player(savedState.player);
+      this.gameState = {
+        ...savedState,
+        player: this.player,
+      };
       this.lines = [];
+      // If we have a saved player then we pull it's details
     } else {
+      // If we don't have any save data then we can Instantiate a new player
+
+      this.player = Player; // Replace with new Player instance
+
       this.gameState = {
         location: "forest_entrance",
         inventory: ["rusty_sword"],
@@ -24,16 +44,28 @@ export class GameEngine {
         inCombat: false,
       };
     }
+
+    this.io = {
+      output: (text, type = "output") => {
+        this.addLine(text, type);
+      },
+      input: (promptText) =>
+        new Promise((resolve) => {
+          this.addLine(promptText, "input");
+          this.awaitingInput = resolve;
+        }),
+    };
   }
 
   getLines(): TerminalLine[] {
     return this.lines;
   }
 
-  addLine(
-    text: string,
-    type: TerminalLine["type"] = "output"
-  ): Promise<void> {
+  // getAwaitingInput() {
+  //   return this.awaitingInput;
+  // }
+
+  addLine(text: string, type: TerminalLine["type"] = "output"): Promise<void> {
     return new Promise((resolve) => {
       this.lines.push({
         id: `${Date.now()}-${Math.random()}`,
@@ -121,7 +153,7 @@ export class GameEngine {
       default:
         await this.addLine(
           `Unknown command: "${command}". Type "help" for available commands.`,
-          "error"
+          "error",
         );
     }
 
@@ -175,12 +207,9 @@ export class GameEngine {
     }
 
     await this.addLine(loc.description);
-    
+
     if (loc.items && loc.items.length > 0) {
-      await this.addLine(
-        `\nYou see: ${loc.items.join(", ")}`,
-        "success"
-      );
+      await this.addLine(`\nYou see: ${loc.items.join(", ")}`, "success");
     }
 
     if (loc.npcs && loc.npcs.length > 0) {
@@ -212,18 +241,16 @@ export class GameEngine {
     await this.addLine("=== CHARACTER STATUS ===", "system");
     await this.addLine(
       `Health: ${this.gameState.health}/${this.gameState.maxHealth}`,
-      this.gameState.health < 30 ? "error" : "success"
+      this.gameState.health < 30 ? "error" : "success",
     );
     await this.addLine(
-      `Location: ${this.gameState.location.replace(/_/g, " ")}`
+      `Location: ${this.gameState.location.replace(/_/g, " ")}`,
     );
-    await this.addLine(
-      `Items: ${this.gameState.inventory.length}`
-    );
+    await this.addLine(`Items: ${this.gameState.inventory.length}`);
     if (this.gameState.inCombat && this.gameState.enemy) {
       await this.addLine(
         `⚔ In combat with: ${this.gameState.enemy.name} (HP: ${this.gameState.enemy.health})`,
-        "error"
+        "error",
       );
     }
     await this.addLine("========================", "system");
@@ -244,7 +271,7 @@ export class GameEngine {
   }
 
   private async attack(
-    target: string
+    target: string,
   ): Promise<{ shake?: boolean; flash?: string }> {
     if (!this.gameState.inCombat) {
       this.gameState.inCombat = true;
@@ -259,13 +286,13 @@ export class GameEngine {
       this.gameState.enemy.health -= damage;
       await this.addLine(
         `⚔ You attack ${this.gameState.enemy.name} for ${damage} damage!`,
-        "error"
+        "error",
       );
 
       if (this.gameState.enemy.health <= 0) {
         await this.addLine(
           `✓ You defeated ${this.gameState.enemy.name}!`,
-          "success"
+          "success",
         );
         this.gameState.inCombat = false;
         this.gameState.enemy = undefined;
@@ -277,7 +304,7 @@ export class GameEngine {
       this.gameState.health -= enemyDamage;
       await this.addLine(
         `✗ ${this.gameState.enemy.name} hits you for ${enemyDamage} damage!`,
-        "error"
+        "error",
       );
 
       if (this.gameState.health <= 0) {
@@ -304,12 +331,12 @@ export class GameEngine {
       const healing = 30;
       this.gameState.health = Math.min(
         this.gameState.maxHealth,
-        this.gameState.health + healing
+        this.gameState.health + healing,
       );
       this.gameState.inventory.splice(index, 1);
       await this.addLine(
         `You used ${item} and restored ${healing} health!`,
-        "success"
+        "success",
       );
     } else {
       await this.addLine(`You can't use ${item} right now.`);
@@ -336,17 +363,14 @@ export class GameEngine {
 
   async initialize() {
     await this.addLine("=".repeat(60), "system");
-    await this.addLine(
-      "    WELCOME TO THE DARK FOREST ADVENTURE",
-      "system"
-    );
+    await this.addLine("    WELCOME TO THE DARK FOREST ADVENTURE", "system");
     await this.addLine("=".repeat(60), "system");
     await this.addLine("");
     await this.addLine(
-      "You awaken in a mysterious forest with no memory of how you got here."
+      "You awaken in a mysterious forest with no memory of how you got here.",
     );
     await this.addLine(
-      "Your only possessions are a rusty sword and your wits."
+      "Your only possessions are a rusty sword and your wits.",
     );
     await this.addLine("");
     await this.addLine('Type "help" for available commands.', "success");

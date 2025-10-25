@@ -81,7 +81,7 @@ export default function Terminal({
       className={cn(
         "h-screen w-full bg-black text-green-400 font-mono flex flex-col transition-all duration-100",
         shake && "animate-shake",
-        flash && "animate-flash"
+        flash && "animate-flash",
       )}
       style={{
         backgroundColor: flash || "#000000",

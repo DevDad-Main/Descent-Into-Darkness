@@ -50,11 +50,20 @@ export default function Home() {
 
   const handleCommand = async (command: string) => {
     if (!gameRef.current || isProcessing) return;
+    const game = gameRef.current;
 
+    // 1️⃣ Check if the game is waiting for input
+    if (game.awaitingInput) {
+      game.awaitingInput(command); // resume the async io.input() in backend
+      game.awaitingInput = null;
+      return;
+    }
+
+    // 2️⃣ Otherwise, handle as a normal command
     setIsProcessing(true);
 
-    const effects = await gameRef.current.processCommand(command);
-    setLines([...gameRef.current.getLines()]);
+    const effects = await game.processCommand(command);
+    setLines([...game.getLines()]);
 
     if (effects.shake) {
       setShake(true);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 
 interface MainMenuProps {
@@ -7,7 +7,11 @@ interface MainMenuProps {
   hasSavedGame: boolean;
 }
 
-export default function MainMenu({ onNewGame, onContinue, hasSavedGame }: MainMenuProps) {
+export default function MainMenu({
+  onNewGame,
+  onContinue,
+  hasSavedGame,
+}: MainMenuProps) {
   const [showMenu, setShowMenu] = useState(true);
 
   const handleNewGame = () => {
@@ -27,25 +31,20 @@ export default function MainMenu({ onNewGame, onContinue, hasSavedGame }: MainMe
       <div className="relative">
         {/* Glowing effect */}
         <div className="absolute inset-0 bg-green-500/20 blur-3xl animate-pulse"></div>
-        
+
         <div className="relative space-y-8 text-center">
           {/* ASCII Title */}
-          <div className="font-mono text-green-400 text-sm leading-tight select-none">
-            <pre className="animate-in slide-in-from-top duration-700">
-{`
-╔═══════════════════════════════════════════════════════╗
-║                                                       ║
-║   ██████╗ ███████╗███████╗ ██████╗███████╗███╗   ██╗████████╗ ║
-║   ██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝████╗  ██║╚══██╔══╝ ║
-║   ██║  ██║█████╗  ███████╗██║     █████╗  ██╔██╗ ██║   ██║    ║
-║   ██║  ██║██╔══╝  ╚════██║██║     ██╔══╝  ██║╚██╗██║   ██║    ║
-║   ██████╔╝███████╗███████║╚██████╗███████╗██║ ╚████║   ██║    ║
-║   ╚═════╝ ╚══════╝╚══════╝ ╚═════╝╚══════╝╚═╝  ╚═══╝   ╚═╝    ║
-║                                                       ║
-║              INTO DARKNESS                            ║
-║                                                       ║
-╚═══════════════════════════════════════════════════════╝
-`}
+
+          <div className="font-mono text-green-400 text-sm leading-tight select-none text-center">
+            <pre className="animate-in slide-in-from-top duration-700 inline-block text-left">
+              {`██████╗ ███████╗███████╗ ██████╗███████╗███╗   ██╗████████╗
+██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝████╗  ██║╚══██╔══╝
+██║  ██║█████╗  ███████╗██║     █████╗  ██╔██╗ ██║   ██║
+██║  ██║██╔══╝  ╚════██║██║     ██╔══╝  ██║╚██╗██║   ██║
+██████╔╝███████╗███████║╚██████╗███████╗██║ ╚████║   ██║
+╚═════╝ ╚══════╝╚══════╝ ╚═════╝╚══════╝╚═╝  ╚═══╝   ╚═╝
+
+                       INTO DARKNESS`}
             </pre>
           </div>
 
@@ -73,8 +72,11 @@ export default function MainMenu({ onNewGame, onContinue, hasSavedGame }: MainMe
           </div>
 
           {/* Version info */}
-          <div className="text-green-700 font-mono text-xs animate-in fade-in duration-1000 delay-500">
-            v1.0.0 | Terminal Edition
+          <div className="text-green-700 font-mono text-xs animate-in fade-in duration-1000 delay-500 space-y-1">
+            <div>v1.0.0 | Terminal Edition</div>
+            <div className="text-green-800">
+              <a href="https://github.com/DevDad-Main">Github@DevDad-Main</a>
+            </div>
           </div>
         </div>
       </div>
