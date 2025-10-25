@@ -49,6 +49,18 @@ class HelperUtilities {
     }
   }
   //#endregion
+
+  //#region Take Damage Method
+  static takeDamage(hp: number, damage: number): number {
+    return Math.max(0, hp - damage);
+  }
+  //#endregion
+
+  //#region Add Health Method
+  static addHealth(hp: number, maxHp: number, health: number): number {
+    return Math.min(hp + health, maxHp);
+  }
+  //#endregion
 }
 
 export default HelperUtilities;
