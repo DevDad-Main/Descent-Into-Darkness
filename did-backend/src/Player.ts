@@ -83,6 +83,25 @@ export class Player {
     }
     this.#level = value;
   }
+
+  /**
+   * Takes damage from the player
+   * @param damage
+   * @returns {number} The amount of XP required to level up
+   */
+  public takeDamage(damage: number): number {
+    return Math.max(0, this.hp - damage);
+  }
+
+  /**
+   * Adds health to the player
+   * @param health
+   * @returns The minimum of the current health and the new health so we never exceed the max hp
+   */
+  public addHealth(health: number) {
+    return Math.min(this.maxHp, this.hp + health);
+  }
+
   //#endregion
 
   //#region Get Xp To Next Level Method
@@ -90,7 +109,7 @@ export class Player {
    * Returns the amount of XP required to level up
    * @returns {number} The amount of XP required to level up
    */
-  #getXpToNextLevel() {
+  #getXpToNextLevel(): number {
     // Example: XP required increases each level
     return 10 * this.level ** 2;
   }
@@ -101,7 +120,7 @@ export class Player {
    * Attack method for fighter class.
    * @param {object} enemy - The Players current attackable enemy
    */
-  attack(enemy) {
+  attack(enemy: object) {
     this.back = false;
     while (true) {
       console.log("\n[Weapon] | [Gut] punch | [Back]");
@@ -135,7 +154,7 @@ export class Player {
    * Basic melee attack for all classes.
    * @param {object} enemy - The Players current attackable enemy
    */
-  melee_attack(enemy) {
+  melee_attack(enemy: object) {
     let attack = 2 + this.strength + Math.round(this.stamina * Math.random());
     let damage = Math.round(Math.random() * (this.stamina / 2)) + this.strength;
     if (attack >= enemy.accuracy) {
@@ -154,7 +173,7 @@ export class Player {
    * Handles additional options for thieves in combat.
    * @param {object} enemy - Potential encounter when thieiving.
    */
-  thievery(enemy) {
+  thievery(enemy: object) {
     this.back = false;
     while (true) {
       let choice = prompt(`\n[Steal] | [Backstab] | [Back] -> `).toLowerCase();
@@ -229,7 +248,7 @@ export class Player {
    * Spells menu that only mages have access to.
    * @param {object} enemy - Enemy encounter when in combat
    */
-  spells(enemy) {
+  spells(enemy: object) {
     this.back = false;
     while (true) {
       console.log(
@@ -398,7 +417,7 @@ export class Player {
    * Handles the [Use] from the first Inventory menu
    * @param {object} enemy - Enemy encounter when in combat
    */
-  useItem(enemy) {
+  useItem(enemy: object) {
     this.usedItem = false;
     this.back = false;
     while (!this.usedItem) {
