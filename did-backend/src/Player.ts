@@ -1,5 +1,5 @@
 import Monster from "./Monster.js";
-import HelperUtilities from "./utils.js";
+import HelperUtilities from "./Utils";
 import { IO } from "../../did-frontend-tui/src/lib/gameEngine";
 
 export interface PlayerConfig {
@@ -128,16 +128,11 @@ export class Player {
   }
   //#endregion
 
-  async helloWorld(text: string): Promise<void> {
-    const choice = (await this.prompt("Hello World -> ")).toLowerCase();
-    if (choice === "back") {
-      this.back = true;
-    } else {
-      return this.io.output(text);
-    }
-
-    return this.io.output(text);
-  }
+  // async helloWorld(text: string): Promise<void> {
+  //   const choice = (await this.prompt("Hello World -> ")).toLowerCase();
+  //   if (choice === "back") this.back = true;
+  //   this.io.output(text);
+  // }
 
   //#region Attack Method
   /**

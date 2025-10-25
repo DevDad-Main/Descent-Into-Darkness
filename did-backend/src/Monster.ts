@@ -10,7 +10,7 @@ export interface MonsterConfig {
   stamina: number;
   xp: number;
   weapon: string;
-  stunned: boolean;
+  stunned: number;
 }
 //#endregion
 
@@ -25,7 +25,7 @@ export default class Monster {
   stamina: number;
   xp: number;
   weapon: string;
-  stunned: boolean;
+  stunned: number;
   //#endregion
 
   //#region Constructor

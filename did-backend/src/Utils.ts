@@ -1,29 +1,33 @@
-//NOTE: Made our own static class as we will be calling this multiple times
 class HelperUtilities {
+  //#region Get Random Int Method
   /**
    * Returns a random number between min and max, inclusive
    * @param {number} min - Minimum number
    * @param {number} max - Maximum number
    */
-  static getRandomInt(min, max) {
+  static getRandomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
+  //#endregion
 
+  //#region Get Random Item From Array Method
   /**
    * Returns a random choice/index/item from an array
    * @param {Array} array
    * @returns random item
    */
-  static getRandomItemFromArray(array) {
+  static getRandomItemFromArray(array: Array<any>) {
     let randomItem = array[Math.floor(Math.random() * array.length)];
     return randomItem;
   }
+  //#endregion
 
+  //#region Validate Inputs Method
   /**
    * Validation to ensure all properties are defined and we get no errros returned
    * @param  {object} inputs Validation to make sure every property is always defined
    */
-  static validateInputs(inputs = {}) {
+  static validateInputs(inputs: object = {}) {
     //NOTE: Old code as this would only check if the value was falsy and wouldnt know what the variable is;
     // inputs.forEach((input, index) => {
     //   if (!input) {
@@ -44,8 +48,7 @@ class HelperUtilities {
       throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
     }
   }
+  //#endregion
 }
 
 export default HelperUtilities;
-// let rand = HelperUtilities.getRandomInt(1, 100); // returns 1 to 100
-// console.log(rand);
