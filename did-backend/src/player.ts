@@ -26,163 +26,62 @@ export interface PlayerConfig {
   room: string;
 }
 
-class Player {
-  //#region Constructor
-  #level = 1;
-  constructor(config = {}) {
-    const {
-      name,
-      playerClass,
-      maxHp,
-      hp,
-      strength,
-      accuracy,
-      stamina,
-      maxMana,
-      mana,
-      equipment,
-      items,
-      stealableItems,
-      stealableWeapons,
-      stealableMagicItems,
-      gold,
-      xp,
-      back,
-      usedItem,
-      weapon,
-      armour,
-      combat,
-      special,
-      room,
-    } = config;
-    // Object.assign(this, {
-    //   name,
-    //   playerClass,
-    //   maxHp,
-    //   hp,
-    //   strength,
-    //   accuracy,
-    //   stamina,
-    //   maxMana,
-    //   mana,
-    //   equipment,
-    //   items,
-    //   stealableItems,
-    //   stealableWeapons,
-    //   stealableMagicItems,
-    //   gold,
-    //   xp,
-    //   back,
-    //   usedItem,
-    //   weapon,
-    //   armour,
-    //   combat,
-    //   special,
-    //   room,
-    // });
-    HelperUtilities.validateInputs({
-      name,
-      playerClass,
-      maxHp,
-      hp,
-      strength,
-      accuracy,
-      stamina,
-      maxMana,
-      mana,
-      equipment,
-      items,
-      stealableItems,
-      stealableWeapons,
-      stealableMagicItems,
-      gold,
-      xp,
-      back,
-      usedItem,
-      weapon,
-      armour,
-      combat,
-      special,
-      room,
-    });
+export class Player {
+  // All public properties - Definite assignment assertion ! - Telling the compiler that this will be assigned before use
+  name!: string;
+  playerClass!: string;
+  maxHp!: number;
+  hp!: number;
+  strength!: number;
+  accuracy!: number;
+  stamina!: number;
+  maxMana!: number;
+  mana!: number;
+  equipment!: string[];
+  items!: string[];
+  stealableItems!: string[];
+  stealableWeapons!: string[];
+  stealableMagicItems!: string[];
+  gold!: number;
+  xp!: number;
+  back!: boolean;
+  usedItem!: boolean;
+  weapon!: string;
+  armour!: string;
+  combat!: boolean;
+  special!: number;
+  room!: string;
 
+  // Private field - could also use the private keyword
+  #level = 1;
+
+  //#region Constructor
+  constructor(config: PlayerConfig) {
+    // Assign all config properties to this instance
     Object.assign(this, config);
-    // HelperUtilities.validateInputs({
-    //   name,
-    //   playerClass,
-    //   maxHp,
-    //   hp,
-    //   strength,
-    //   accuracy,
-    //   stamina,
-    //   maxMana,
-    //   mana,
-    //   equipment,
-    //   items,
-    //   stealableItems,
-    //   stealableWeapons,
-    //   stealableMagicItems,
-    //   gold,
-    //   xp,
-    //   back,
-    //   usedItem,
-    //   weapon,
-    //   armour,
-    //   combat,
-    //   special,
-    //   room,
-    // });
-    //
-    /*//NOTE: REMINDER
-      // I pass one object with named properties when creating the player.
-      // The constructor({ ... }) pulls out those properties using destructuring.
-      // Object.assign(this, {...}) attaches all the variables to the new object instance quickly.
-      // I can still validate required fields by checking their values.
-      // Now we don't have to write out all the below, we can do the above in a cleaner fashion.
-     */
-    // {this.name = name;
-    // this.player_class = player_class;
-    // this.max_hp = max_hp;
-    // this.hp = hp;
-    // this.strength = strength;
-    // this.accuracy = accuracy;
-    // this.stamina = stamina;
-    // this.max_mana = max_mana;
-    // this.mana = mana;
-    // this.equipment = equipment;
-    // this.items = items;
-    // this.gold = gold;
-    // this.xp = xp;
-    // this.back = back;
-    // this.used_item = used_item;
-    // this.weapon = weapon;
-    // this.armour = armour;
-    // this.combat = combat;
-    // this.special = special;
-    // this.room = room; }
+
+    // Validate inputs
+    HelperUtilities.validateInputs(this);
   }
   //#endregion
 
   //#region Getters and Setters
   /**
    * Getter property for accessing private player level;
-   * @param {number} level - The players current level
    */
-  get level() {
+  get level(): number {
     return this.#level;
   }
 
   /**
    * Setter property for accessing private player level;
-   * @param {number} level - The players current level
+   * @param {number} value - The players current level
    */
-  set level(value) {
+  set level(value: number) {
     if (value <= this.#level) {
-      return console.error(
-        "Player Level cannot be set lower than current level",
-      );
+      throw new Error("Player Level cannot be set lower than current level");
     }
-    return (this.#level = value);
+    this.#level = value;
   }
   //#endregion
 
