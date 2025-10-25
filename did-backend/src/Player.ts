@@ -1,4 +1,6 @@
+import Monster from "./Monster.js";
 import HelperUtilities from "./utils.js";
+import { IO } from "../../did-frontend-tui/src/lib/gameEngine";
 
 export interface PlayerConfig {
   name: string;
@@ -51,17 +53,19 @@ export class Player {
   combat!: boolean;
   special!: number;
   room!: string;
+  io: IO;
 
   // Private field - could also use the private keyword
   #level = 1;
 
   //#region Constructor
-  constructor(config: PlayerConfig) {
+  constructor(config: PlayerConfig, io: IO) {
     // Assign all config properties to this instance
     Object.assign(this, config);
+    this.io = io;
 
     // Validate inputs
-    HelperUtilities.validateInputs(this);
+    HelperUtilities.validateInputs(config);
   }
   //#endregion
 
@@ -83,16 +87,20 @@ export class Player {
     }
     this.#level = value;
   }
+  //#endregion
 
+  //#region Player Take Damage method
   /**
    * Takes damage from the player
    * @param damage
-   * @returns {number} The amount of XP required to level up
+   * @returns {number} The maximum of 0 and the current health minus the damage so we never go below 0
    */
   public takeDamage(damage: number): number {
     return Math.max(0, this.hp - damage);
   }
+  //#endregion
 
+  //#region Player Add Health method
   /**
    * Adds health to the player
    * @param health
@@ -101,7 +109,6 @@ export class Player {
   public addHealth(health: number) {
     return Math.min(this.maxHp, this.hp + health);
   }
-
   //#endregion
 
   //#region Get Xp To Next Level Method
@@ -115,16 +122,34 @@ export class Player {
   }
   //#endregion
 
+  //#region Async IO input wrapper method
+  async prompt(message: string): Promise<string> {
+    return this.io.input(message);
+  }
+  //#endregion
+
+  async helloWorld(text: string): Promise<void> {
+    const choice = (await this.prompt("Hello World -> ")).toLowerCase();
+    if (choice === "back") {
+      this.back = true;
+    } else {
+      return this.io.output(text);
+    }
+
+    return this.io.output(text);
+  }
+
   //#region Attack Method
   /**
    * Attack method for fighter class.
-   * @param {object} enemy - The Players current attackable enemy
+   * @param {Monster} enemy - The Players current attackable enemy
    */
-  attack(enemy: object) {
+  async attack(enemy: Monster): Promise<void> {
     this.back = false;
+
     while (true) {
-      console.log("\n[Weapon] | [Gut] punch | [Back]");
-      let choice = prompt("Select Attack -> ").toLowerCase();
+      await this.io.input("\n[Weapon] | [Gut] punch | [Back]");
+      const choice = (await this.prompt("Select Attack -> ")).toLowerCase();
       if (choice === "back") {
         this.back = true;
         break;

@@ -14,6 +14,7 @@ export interface MonsterConfig {
 }
 //#endregion
 
+//#region Monster Class
 export default class Monster {
   //#region Properties
   name: string;
@@ -67,8 +68,11 @@ export default class Monster {
       console.log(
         `\n${this.name} strikes ${enemy.name} with their ${this.weapon} for ${damage} damage!`,
       );
-      enemy.hp -= damage;
+      enemy.takeDamage(damage);
+    } else {
+      console.log(`\n${this.name} missed!`);
     }
   }
   //#endregion
 }
+//#endregion

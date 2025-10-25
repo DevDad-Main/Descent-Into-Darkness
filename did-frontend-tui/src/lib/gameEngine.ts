@@ -1,5 +1,10 @@
 import { TerminalLine } from "../components/Terminal";
-import Player from "../../../did-backend/src/player.js";
+import Player, { PlayerConfig } from "../../../did-backend/src/Player.ts";
+
+export type IO = {
+  output: (text: string, type?: TerminalLine["type"]) => void;
+  input: (promptText: string) => Promise<string>;
+};
 
 export class GameEngine {
   private lines: TerminalLine[] = [];
@@ -15,16 +20,29 @@ export class GameEngine {
 
   player: Player;
 
-  io: {
-    output: (text: string, type?: TerminalLine["type"]) => void;
-    input: (promptText: string) => Promise<string>;
-  };
+  io: IO;
 
   awaitingInput: ((input: string) => void) | null = null;
 
   constructor(savedState?: any) {
+    this.io = {
+      output: (text, type = "output") => {
+        console.log("[IO OUTPUT]", text);
+        this.addLine(text, type);
+      },
+      input: (promptText) =>
+        new Promise((resolve) => {
+          console.log("[IO INPUT PROMPT]", promptText);
+          this.addLine(promptText, "input");
+          this.awaitingInput = (answer) => {
+            console.log("[IO INPUT RECEIVED]", answer);
+            resolve(answer);
+          };
+        }),
+    };
+
     if (savedState) {
-      this.player = new Player(savedState.player);
+      this.player = new Player(savedState.player, this.io);
       this.gameState = {
         ...savedState,
         player: this.player,
@@ -33,28 +51,43 @@ export class GameEngine {
       // If we have a saved player then we pull it's details
     } else {
       // If we don't have any save data then we can Instantiate a new player
+      // Create a new player with defaults
+      const defaultPlayerConfig: PlayerConfig = {
+        name: "Hero",
+        playerClass: "Warrior",
+        maxHp: 100,
+        hp: 100,
+        strength: 10,
+        accuracy: 8,
+        stamina: 5,
+        maxMana: 50,
+        mana: 50,
+        equipment: [],
+        items: [],
+        stealableItems: [],
+        stealableWeapons: [],
+        stealableMagicItems: [],
+        gold: 0,
+        xp: 0,
+        back: false,
+        usedItem: false,
+        weapon: "Rusty Sword",
+        armour: "Leather Armor",
+        combat: false,
+        special: 0,
+        room: "forest_entrance",
+      };
 
-      this.player = Player; // Replace with new Player instance
+      this.player = new Player(defaultPlayerConfig, this.io);
 
       this.gameState = {
         location: "forest_entrance",
-        inventory: ["rusty_sword"],
-        health: 100,
-        maxHealth: 100,
+        inventory: this.player.equipment,
+        health: this.player.hp,
+        maxHealth: this.player.maxHp,
         inCombat: false,
       };
     }
-
-    this.io = {
-      output: (text, type = "output") => {
-        this.addLine(text, type);
-      },
-      input: (promptText) =>
-        new Promise((resolve) => {
-          this.addLine(promptText, "input");
-          this.awaitingInput = resolve;
-        }),
-    };
   }
 
   getLines(): TerminalLine[] {
@@ -150,6 +183,9 @@ export class GameEngine {
       case "talk":
         await this.talk(parts.slice(1).join(" "));
         break;
+      case "hello":
+        await this.helloWorld(parts.slice(1).join(" "));
+        break;
       default:
         await this.addLine(
           `Unknown command: "${command}". Type "help" for available commands.`,
@@ -172,6 +208,7 @@ export class GameEngine {
     await this.addLine("  attack [target] - Attack an enemy");
     await this.addLine("  use [item]    - Use an item from inventory");
     await this.addLine("  talk [person] - Talk to someone");
+    await this.addLine("  hello         - Say hello to the world");
     await this.addLine("========================", "system");
   }
 
@@ -268,6 +305,13 @@ export class GameEngine {
     const itemName = item.toLowerCase().replace(/ /g, "_");
     this.gameState.inventory.push(itemName);
     await this.addLine(`You picked up: ${item}`, "success");
+  }
+
+  private async helloWorld(text: string) {
+    // console.log(text);
+    // const txt = text.toLowerCase().replace(/ /g, "_");
+    // console.log(txt);
+    return this.player.helloWorld(text);
   }
 
   private async attack(
