@@ -98,15 +98,12 @@ export class GameEngine {
   //   return this.awaitingInput;
   // }
 
-  addLine(text: string, type: TerminalLine["type"] = "output"): Promise<void> {
-    return new Promise((resolve) => {
-      this.lines.push({
-        id: `${Date.now()}-${Math.random()}`,
-        text,
-        type,
-        timestamp: Date.now(),
-      });
-      setTimeout(resolve, 50);
+  addLine(text: string, type: TerminalLine["type"] = "output"): void {
+    this.lines.push({
+      id: `${Date.now()}-${Math.random()}`,
+      text,
+      type,
+      timestamp: Date.now(),
     });
   }
 
@@ -139,7 +136,7 @@ export class GameEngine {
     shake?: boolean;
     flash?: string;
   }> {
-    await this.addLine(command, "input");
+    this.addLine(command, "input");
 
     const cmd = command.toLowerCase().trim();
     const parts = cmd.split(" ");
@@ -150,7 +147,7 @@ export class GameEngine {
     switch (action) {
       case "save":
         this.saveGame();
-        await this.addLine("Game saved successfully!", "success");
+        this.addLine("Game saved successfully!", "success");
         break;
       case "help":
         await this.showHelp();
@@ -187,7 +184,7 @@ export class GameEngine {
         await this.helloWorld(parts.slice(1).join(" "));
         break;
       default:
-        await this.addLine(
+        this.addLine(
           `Unknown command: "${command}". Type "help" for available commands.`,
           "error",
         );
@@ -197,19 +194,19 @@ export class GameEngine {
   }
 
   private async showHelp() {
-    await this.addLine("=== AVAILABLE COMMANDS ===", "system");
-    await this.addLine("  help          - Show this help message");
-    await this.addLine("  save          - Save your game");
-    await this.addLine("  look          - Examine your surroundings");
-    await this.addLine("  inventory     - Check your inventory");
-    await this.addLine("  status        - View your character status");
-    await this.addLine("  go [place]    - Move to a location");
-    await this.addLine("  take [item]   - Pick up an item");
-    await this.addLine("  attack [target] - Attack an enemy");
-    await this.addLine("  use [item]    - Use an item from inventory");
-    await this.addLine("  talk [person] - Talk to someone");
-    await this.addLine("  hello         - Say hello to the world");
-    await this.addLine("========================", "system");
+    this.addLine("=== AVAILABLE COMMANDS ===", "system");
+    this.addLine("  help          - Show this help message");
+    this.addLine("  save          - Save your game");
+    this.addLine("  look          - Examine your surroundings");
+    this.addLine("  inventory     - Check your inventory");
+    this.addLine("  status        - View your character status");
+    this.addLine("  go [place]    - Move to a location");
+    this.addLine("  take [item]   - Pick up an item");
+    this.addLine("  attack [target] - Attack an enemy");
+    this.addLine("  use [item]    - Use an item from inventory");
+    this.addLine("  talk [person] - Talk to someone");
+    this.addLine("  hello         - Say hello to the world");
+    this.addLine("========================", "system");
   }
 
   private async look() {
@@ -239,72 +236,70 @@ export class GameEngine {
 
     const loc = locations[this.gameState.location];
     if (!loc) {
-      await this.addLine("You are in an unknown location.", "error");
+      this.addLine("You are in an unknown location.", "error");
       return;
     }
 
-    await this.addLine(loc.description);
+    this.addLine(loc.description);
 
     if (loc.items && loc.items.length > 0) {
-      await this.addLine(`\nYou see: ${loc.items.join(", ")}`, "success");
+      this.addLine(`\nYou see: ${loc.items.join(", ")}`, "success");
     }
 
     if (loc.npcs && loc.npcs.length > 0) {
-      await this.addLine(`\nPeople here: ${loc.npcs.join(", ")}`);
+      this.addLine(`\nPeople here: ${loc.npcs.join(", ")}`);
     }
 
     if (loc.enemies && loc.enemies.length > 0) {
-      await this.addLine(`\n⚠ Enemies: ${loc.enemies.join(", ")}`, "error");
+      this.addLine(`\n⚠ Enemies: ${loc.enemies.join(", ")}`, "error");
     }
 
     if (loc.exits && loc.exits.length > 0) {
-      await this.addLine(`\nExits: ${loc.exits.join(", ")}`);
+      this.addLine(`\nExits: ${loc.exits.join(", ")}`);
     }
   }
 
   private async showInventory() {
-    await this.addLine("=== INVENTORY ===", "system");
+    this.addLine("=== INVENTORY ===", "system");
     if (this.gameState.inventory.length === 0) {
-      await this.addLine("Your inventory is empty.");
+      this.addLine("Your inventory is empty.");
     } else {
       for (const item of this.gameState.inventory) {
-        await this.addLine(`  • ${item.replace(/_/g, " ")}`);
+        this.addLine(`  • ${item.replace(/_/g, " ")}`);
       }
     }
-    await this.addLine("=================", "system");
+    this.addLine("=================", "system");
   }
 
   private async showStatus() {
-    await this.addLine("=== CHARACTER STATUS ===", "system");
-    await this.addLine(
+    this.addLine("=== CHARACTER STATUS ===", "system");
+    this.addLine(
       `Health: ${this.gameState.health}/${this.gameState.maxHealth}`,
       this.gameState.health < 30 ? "error" : "success",
     );
-    await this.addLine(
-      `Location: ${this.gameState.location.replace(/_/g, " ")}`,
-    );
-    await this.addLine(`Items: ${this.gameState.inventory.length}`);
+    this.addLine(`Location: ${this.gameState.location.replace(/_/g, " ")}`);
+    this.addLine(`Items: ${this.gameState.inventory.length}`);
     if (this.gameState.inCombat && this.gameState.enemy) {
-      await this.addLine(
+      this.addLine(
         `⚔ In combat with: ${this.gameState.enemy.name} (HP: ${this.gameState.enemy.health})`,
         "error",
       );
     }
-    await this.addLine("========================", "system");
+    this.addLine("========================", "system");
   }
 
   private async move(destination: string) {
     const dest = destination.toLowerCase().replace(/ /g, "_");
     // Simplified movement - in real game, check valid exits
     this.gameState.location = dest;
-    await this.addLine(`You move to ${destination}...`, "success");
+    this.addLine(`You move to ${destination}...`, "success");
     await this.look();
   }
 
   private async takeItem(item: string) {
     const itemName = item.toLowerCase().replace(/ /g, "_");
     this.gameState.inventory.push(itemName);
-    await this.addLine(`You picked up: ${item}`, "success");
+    this.addLine(`You picked up: ${item}`, "success");
   }
 
   private async helloWorld(text: string) {
@@ -328,16 +323,13 @@ export class GameEngine {
     const damage = Math.floor(Math.random() * 20) + 10;
     if (this.gameState.enemy) {
       this.gameState.enemy.health -= damage;
-      await this.addLine(
+      this.addLine(
         `⚔ You attack ${this.gameState.enemy.name} for ${damage} damage!`,
         "error",
       );
 
       if (this.gameState.enemy.health <= 0) {
-        await this.addLine(
-          `✓ You defeated ${this.gameState.enemy.name}!`,
-          "success",
-        );
+        this.addLine(`✓ You defeated ${this.gameState.enemy.name}!`, "success");
         this.gameState.inCombat = false;
         this.gameState.enemy = undefined;
         return { shake: false };
@@ -346,13 +338,13 @@ export class GameEngine {
       // Enemy counter-attack
       const enemyDamage = Math.floor(Math.random() * 15) + 5;
       this.gameState.health -= enemyDamage;
-      await this.addLine(
+      this.addLine(
         `✗ ${this.gameState.enemy.name} hits you for ${enemyDamage} damage!`,
         "error",
       );
 
       if (this.gameState.health <= 0) {
-        await this.addLine("☠ You have been defeated...", "error");
+        this.addLine("☠ You have been defeated...", "error");
         this.gameState.health = 0;
       }
 
