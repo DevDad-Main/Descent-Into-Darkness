@@ -234,7 +234,7 @@ Available Commands:
 
   const renderGamePlay = () => (
     <div className="space-y-4">
-      <div className="border-b border-green-500/30 pb-4">
+      <div className="border-b border-green-500/50 pb-4">
         <h2 className="text-2xl font-bold text-green-400">
           {gameState.currentLocation.name}
         </h2>

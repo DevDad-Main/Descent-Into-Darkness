@@ -65,7 +65,7 @@ export default function CRTDisplay({ children, className }: CRTDisplayProps) {
           background: radial-gradient(ellipse at center,
             rgba(255,255,255,0.08) 0%,
             rgba(255,255,255,0.03) 25%,
-            rgba(0,0,0,0.4) 55%,
+            rgba(0,0,0,0.2) 55%,
             rgba(0,0,0,0.85) 100%);
             mix-blend-mode: overlay;
           transform: scale(1.05);
@@ -117,12 +117,12 @@ export default function CRTDisplay({ children, className }: CRTDisplayProps) {
           }
         }
 
+
         .screen-curve {
           border-radius: 1.25rem;
-
-          transform: perspective(1200px) translateZ(40px) rotateX(1.2deg) rotateY(-1.2deg);
-
+          transform: perspective(1600px) translateZ(20px) rotateX(1.5deg) rotateY(0deg);
         }
+
 
         .screen-glow {
           color: #00ff00;
@@ -136,8 +136,8 @@ export default function CRTDisplay({ children, className }: CRTDisplayProps) {
           background: radial-gradient(
             ellipse at center,
             transparent 0%,
-            transparent 60%,
-            rgba(0, 0, 0, 0.9) 100%
+            transparent 70%,
+            rgba(0, 0, 0, 0.8) 100%
           );
         }
 
