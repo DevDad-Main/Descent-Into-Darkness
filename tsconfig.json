@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",                     // Modern JS output for Node 18+
+    "module": "CommonJS",                   // Node.js default module system
+    "rootDir": "./game",                     // Source code folder
+    "outDir": "./dist",                     // Compiled JS output
+    "strict": true,                         // Enable all strict type-checking options
+    "esModuleInterop": true,                // For default imports from CommonJS modules
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,                   // Skip type checking for node_modules
+    "resolveJsonModule": true,              // Allow importing JSON files
+    "noImplicitAny": true,                  // Disallow implicit any
+    "strictNullChecks": true,               // Null safety
+    "moduleResolution": "node",
+    "allowJs": false,                       // Only compile TS files
+    "sourceMap": true,                      // Generate source maps for debugging
+    "noEmitOnError": true,                  // Don’t emit JS if errors exist
+    "incremental": true                     // Faster recompilation
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

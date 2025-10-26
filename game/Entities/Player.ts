@@ -1,0 +1,645 @@
+import Monster from "./Monster";
+import HelperUtilities from "../Utils/Utils";
+import Item from "../Wearables/Item";
+
+//#region Player Config Interface
+export interface PlayerConfig {
+  name: string;
+  playerClass: string;
+  maxHp: number;
+  hp: number;
+  strength: number;
+  accuracy: number;
+  stamina: number;
+  maxMana: number;
+  mana: number;
+  equipment: string[];
+  items: string[];
+  stealableItems?: string[];
+  stealableWeapons?: string[];
+  stealableMagicItems?: string[];
+  gold: number;
+  xp: number;
+  back: boolean;
+  usedItem: boolean;
+  weapon: string;
+  armour: string;
+  combat: boolean;
+  special: number;
+  room: string;
+}
+//#endregion
+
+export class Player {
+  // All public properties - Definite assignment assertion ! - Telling the compiler that this will be assigned before use
+  name = "Unnamed Hero";
+  playerClass = "Adventurer";
+  maxHp = 10;
+  hp = 10;
+  strength = 5;
+  accuracy = 5;
+  stamina = 5;
+  maxMana = 5;
+  mana = 5;
+  equipment: Item[] = [];
+  items: Item[] = [];
+  stealableItems: string[] = [];
+  stealableWeapons: string[] = [];
+  stealableMagicItems: string[] = [];
+  gold = 0;
+  xp = 0;
+  back = false;
+  usedItem = false;
+  weapon = "None";
+  armour = "Cloth";
+  combat = false;
+  special = 0;
+  room = "start";
+
+  // Private field - could also use the private keyword
+  private _level = 1;
+
+  //#region Constructor
+  constructor(config: PlayerConfig) {
+    // Assign all config properties to this instance
+    Object.assign(this, config);
+
+    // Validate inputs
+    HelperUtilities.validateInputs(config);
+  }
+  //#endregion
+
+  //#region Getters and Setters
+  /**
+   * Getter property for accessing private player level;
+   */
+  get level(): number {
+    return this._level;
+  }
+
+  /**
+   * Setter property for accessing private player level;
+   * @param {number} value - The players current level
+   */
+  set level(value: number) {
+    if (value <= this._level) {
+      throw new Error("Player Level cannot be set lower than current level");
+    }
+    this._level = value;
+  }
+  //#endregion
+
+  //#region Player Take Damage method
+  /**
+   * Takes damage from the player
+   * @param damage
+   * @returns {number} The maximum of 0 and the current health minus the damage so we never go below 0
+   */
+  takeDamage(damage: number): number {
+    return HelperUtilities.takeDamage(this.hp, damage);
+  }
+  //#endregion
+
+  //#region Player Add Health method
+  /**
+   * Adds health to the player
+   * @param health
+   * @returns The minimum of the current health and the new health so we never exceed the max hp
+   */
+  addHealth(health: number) {
+    return HelperUtilities.addHealth(this.hp, this.maxHp, health);
+  }
+  //#endregion
+
+  //#region Get Xp To Next Level Method
+  /**
+   * Returns the amount of XP required to level up
+   * @returns {number} The amount of XP required to level up
+   */
+  #getXpToNextLevel(): number {
+    // Example: XP required increases each level
+    return 10 * this.level ** 2;
+  }
+  //#endregion
+
+  //#region Attack Method
+  /**
+   * Attack method for fighter class.
+   * @param {Monster} enemy - The Players current attackable enemy
+   */
+  attack(enemy: Monster) {
+    this.back = false;
+
+    while (true) {
+      console.log("\n[Weapon] | [Gut] punch | [Back]");
+      const choice = prompt("Select Attack -> ").toLowerCase();
+      if (choice === "back") {
+        this.back = true;
+        break;
+      } else if (choice === "weapon") {
+        this.melee_attack(enemy);
+        break;
+      } else if (choice === "gut") {
+        if (this.special < 1) {
+          prompt("\nYou can't get a good shot at their stomach!.");
+          continue;
+        } else {
+          this.special -= 2;
+          enemy.stunned = 1;
+          let damage = Math.floor(Math.random() * 3) + 1;
+          enemy.hp -= damage;
+          prompt(`${this.name} punches ${enemy.name} in the stomach for ${damage} damage!
+                           ${enemy.name} doubles over in pain. -> `);
+          break;
+        }
+      }
+    }
+  }
+  //#endregion
+
+  //#region Melee Attack Method
+  /**
+   * Basic melee attack for all classes.
+   * @param {Monster} enemy - The Players current attackable enemy
+   */
+  melee_attack(enemy: Monster) {
+    let attack = 2 + this.strength + Math.round(this.stamina * Math.random());
+    let damage = Math.round(Math.random() * (this.stamina / 2)) + this.strength;
+    if (attack >= enemy.accuracy) {
+      prompt(
+        `\n${this.name} strikes ${enemy.name} with their ${this.weapon} for ${damage} damage!`,
+      );
+      enemy.hp -= damage;
+    } else {
+      console.log(`\n${this.name} missed!`);
+    }
+  }
+  //#endregion
+
+  //#region Thievery Method
+  /**
+   * Handles additional options for thieves in combat.
+   * @param {Monster} enemy - Potential encounter when thieiving.
+   */
+  thievery(enemy: Monster) {
+    this.back = false;
+    while (true) {
+      let choice = prompt(`\n[Steal] | [Backstab] | [Back] -> `).toLowerCase();
+      if (choice === "back") {
+        this.back = true;
+        break;
+      } else if (choice === "steal") {
+        if (Math.floor(Math.random() * 10) > 2) {
+          // let lootType = Math.floor(Math.random() * 100) + 1;
+          let lootType = HelperUtilities.getRandomInt(1, 100);
+          if (lootType > 65) {
+            let gold = HelperUtilities.getRandomInt(1, 15);
+            this.gold += gold;
+            prompt(`\nYou have successfully stolen ${gold} gold!`);
+            break;
+          } else if (lootType > 16 && lootType < 65) {
+            let randomItem = HelperUtilities.getRandomItemFromArray(
+              this.stealableItems,
+            );
+            prompt(`\nYou have successfully stolen ${randomItem}!`);
+            this.items.push(randomItem);
+            break;
+          } else if (lootType > 0 && lootType < 15) {
+            let randomItem = HelperUtilities.getRandomItemFromArray(
+              this.stealableWeapons,
+            );
+            prompt(`\nYou have successfully stolen ${randomItem}!`);
+            this.equipment.push(randomItem);
+            break;
+          } else {
+            let randomItem = HelperUtilities.getRandomItemFromArray(
+              this.stealableMagicItems,
+            );
+            prompt(`\nYou have successfully stolen ${randomItem}!`);
+            this.equipment.push(randomItem);
+            break;
+          }
+        } else {
+          prompt(`\nThe creature catches you rifling through it's things!`);
+          break;
+        }
+      } else if (choice === "backstab") {
+        if (this.special < 1) {
+          prompt(`\nYou are too exhausted to attempt another backstab!`);
+        } else {
+          prompt(`You attempt to maneuver behind the creature...`);
+          let attack =
+            5 + this.strength + Math.round(this.stamina * Math.random());
+          let damage =
+            Math.round(Math.random() * (this.stamina / 2)) + this.strength + 10;
+
+          if (attack >= enemy.accuracy) {
+            prompt(
+              `\n${this.name} backstabs ${enemy.name} with their ${this.weapon} for ${damage} damage!`,
+            );
+            enemy.hp -= damage;
+            this.special -= 1;
+            break;
+          } else {
+            console.log(`\n${this.name} missed!`);
+            this.special -= 1;
+            break;
+          }
+        }
+      }
+    }
+  }
+  //#endregion
+
+  //#region Spells Method
+  /**
+   * Spells menu that only mages have access to.
+   * @param {Monster} enemy - Enemy encounter when in combat
+   */
+  spells(enemy: Monster) {
+    this.back = false;
+    while (true) {
+      console.log(
+        `\n[Heal | 4 MP]| [Fireball | 7 MP] | [Stun | 10 MP] | [Back] -> `,
+      );
+      console.log(`MP: ${this.mana}`);
+      let choice = prompt(`Select Spell -> `).toLowerCase();
+      if (choice === "back") {
+        this.back = true;
+        break;
+      } else if (choice === "heal") {
+        if (this.mana < 4) {
+          console.log(
+            "You do not have enough Mana Points to cast the Heal spell!",
+          );
+        } else {
+          this.hp += 5;
+          this.mana -= 4;
+          if (this.hp > this.maxHp) this.hp = this.maxHp;
+          console.log(`\n${this.name} casts Heal and reqains 8 HP!`);
+          break;
+        }
+      } else if (choice === "fireball") {
+        if (!this.combat) {
+          prompt("\nNothing to cast fireball on! -> ");
+        } else if (this.mana < 7) {
+          console.log("You do not have enough Mana Points to cast Fireball!");
+        } else {
+          this.mana -= 7;
+          let spellDamage = HelperUtilities.getRandomInt(12, 15);
+          enemy.hp -= spellDamage;
+          console.log(
+            `\n${this.name} casts Fireball and ${enemy.name} takes ${spellDamage} damage!`,
+          );
+          break;
+        }
+      } else if (choice === "stun") {
+        if (!this.combat) {
+          console.log("\nNothing to cast Stun on! -> ");
+        } else if (this.mana < 5) {
+          console.log("You do not have enough Mana Points to cast Stun!");
+        } else {
+          this.mana -= 10;
+          enemy.stunned = 2;
+          prompt(
+            `\n${this.name} casts Stun!. ${enemy.name}'s eyes glaze over...`,
+          );
+          break;
+        }
+      }
+    }
+  }
+  //#endregion
+
+  //#region Inventory Method
+  /**
+   * First layer of inventory fucntionality. Displays a list of items
+   * currently in inventory and actions that can be perfomed wih them.
+   */
+  inventory() {
+    this.back = false;
+    while (true) {
+      if (
+        this.equipment.length === 0 &&
+        this.items.length === 0 &&
+        this.gold === 0
+      ) {
+        // Well your poor.
+        console.log(`\nYou are not currently carrying anything.`);
+      } else {
+        console.log("\n////////////////////////////");
+        console.log("You are currently carrying...");
+        console.log("\nEquipment:");
+        for (const item of this.equipment) {
+          console.log(item.name);
+        }
+        console.log(`\nItems:`);
+        if (this.items.length < 1) {
+          console.log(`You are not currently carrying any items`);
+        } else {
+          for (const item of this.items) {
+            console.log(item.name);
+          }
+        }
+        console.log(`\nGold: ${this.gold}`);
+      }
+      let choice = prompt(
+        `\n[Equip] | [Use] | [Inspect] | [Back] -> `,
+      ).toLowerCase();
+
+      if (choice === "equip") {
+        this.changeEquipment();
+        if (this.back) {
+          continue;
+        } else {
+          break;
+        }
+      } else if (choice === "use") {
+        if (this.combat) {
+          this.usedItem = true;
+          break;
+        } else if (!this.combat) {
+          this.useItem(null);
+        }
+      } else if (choice === "inspect") {
+        this.inspect();
+        continue;
+      } else if (choice === "back") {
+        this.back = true;
+        break;
+      } else {
+        continue;
+      }
+    }
+  }
+  //#endregion
+
+  //#region Change Equipment Method
+  /**
+   * Handles the [Equip] option from the first inventory menu.
+   */
+  changeEquipment() {
+    this.back = false;
+    while (true) {
+      console.log("\nEquipment:");
+      this.equipment.forEach((item, index) => {
+        console.log(`${index}. ${item.name}`);
+      });
+      try {
+        let choice = prompt(
+          `\nSelect an item with the corresponding number or [Back] -> `,
+        ).toLowerCase();
+
+        if (choice === "back") {
+          this.back = true;
+          break;
+        }
+        let intChoice = parseInt(choice);
+        if (
+          this.weapon === this.equipment[intChoice].name ||
+          this.armour === this.equipment[intChoice].name
+        ) {
+          let confirm = prompt(
+            `Would you like to unequip the ${this.equipment[intChoice].name} -> `,
+          ).toLowerCase();
+
+          if (confirm === "yes") {
+            this.equipment[intChoice].unequip();
+            break;
+          }
+        } else {
+          let confirm = prompt(
+            `Would you like to equip the ${this.equipment[intChoice].name}? -> `,
+          ).toLowerCase();
+          if (confirm === "yes") {
+            this.equipment[intChoice].equip();
+            break;
+          }
+        }
+      } catch (error) {
+        console.log(`Error accesing Value: ${error}`);
+        continue;
+      }
+    }
+  }
+  //#endregion
+
+  //#region Use Item Method
+  /**
+   * Handles the [Use] from the first Inventory menu
+   * @param {object} enemy - Enemy encounter when in combat
+   */
+  useItem(enemy: object) {
+    this.usedItem = false;
+    this.back = false;
+    while (!this.usedItem) {
+      console.log(`\nItems:`);
+      this.items.forEach((item, index) => {
+        console.log(`${index}. ${item.name}`);
+      });
+      try {
+        let choice = prompt(
+          `\nSelect an item by it;s number or [Back] -> `,
+        ).toLowerCase();
+
+        if (choice === "back") {
+          this.back = true;
+          break;
+        }
+        let intChoice = parseInt(choice);
+        let itemChoice = this.items[intChoice];
+        let confirm = prompt(
+          `Wold you like to use ${this.items[intChoice].name}? -> `,
+        ).toLowerCase();
+        if (choice === "yes") {
+          //NOTE: These conditionals are figuring out if the item chosen
+          //NOTE: Will add HP/MANA to the player or deal damage to the enemy
+          if (itemChoice.manaToAdd === 0 && itemChoice.damage === 0) {
+            this.hp += itemChoice.hpToAdd;
+            if (this.hp > this.maxHp) {
+              this.hp = this.maxHp;
+            }
+            prompt(
+              `\n${this.name} uses the ${itemChoice.name} and regains ${itemChoice.hpToAdd} HP!`,
+            );
+
+            this.items.splice(intChoice, 1);
+            this.usedItem = true;
+          } else if (itemChoice.hpToAdd === 0 && itemChoice.damage === 0) {
+            this.mana += itemChoice.manaToAdd;
+            if (this.mana > this.maxMana) {
+              this.mana = this.maxMana;
+            }
+            prompt(
+              `\n${this.name} uses the ${itemChoice.name} an regains ${itemChoice.manaToAdd} MP!`,
+            );
+            this.items.splice(intChoice, 1);
+            this.usedItem = true;
+          } else if (itemChoice.hpToAdd === 0 && itemChoice.manaToAdd === 0) {
+            if (!this.combat) {
+              prompt(`\nNothing to use ${itemChoice.name} on!`);
+            } else {
+              prompt(
+                `\n${this.name} uses the ${itemChoice.name} on ${enemy.name} and deals ${itemChoice.damage} damage!`,
+              );
+              enemy.hp -= itemChoice.damage;
+              this.items.splice(intChoice, 1);
+              this.usedItem = true;
+            }
+          }
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+  }
+  //#endregion
+
+  //#region Inspect Item Method
+  /**
+   * Handles [Inspect] option from the Inventory menu. Displays an item's stats given
+   * its index in player.equipment
+   */
+  inspect() {
+    this.back = false;
+    console.log(`Equipment:`);
+    this.equipment.forEach((item, index) => {
+      console.log(`${index}. ${item.name}`);
+    });
+    while (true) {
+      try {
+        let choice = prompt(
+          `\nInspect an item by its number or [Back] -> `,
+        ).toLowerCase();
+        if (choice === "back") {
+          this.back = true;
+          break;
+        }
+        let intChoice = parseInt(choice);
+        let item = this.equipment[intChoice];
+        if (item?.attack != null) {
+          console.log(`\n${item.name}`);
+          console.log(`Attack: ${item.attack}`);
+          console.log(`Accuracy Penalty: ${item.accuracyPenalty}`);
+        } else {
+          console.log(`\n ${this.equipment[intChoice].name}`);
+          console.log(`Defence: ${this.equipment[intChoice].defence}`);
+        }
+      } catch (error) {
+        console.log(`\nChoose an item by its number.`);
+      }
+    }
+  }
+  //#endregion
+
+  //#region Status Method
+  /**
+   * Displays current player status (Stats, Items equipped etc)
+   */
+  status() {
+    this.back = false;
+    while (true) {
+      console.log("\n////////////////////////////");
+      console.log(`\n${this.name}'s status:`);
+      console.log(`HP: ${this.hp}, MP: ${this.mana}`);
+      console.log(`Strength: ${this.strength}, Stamina: ${this.stamina}`);
+      console.log(`AC: ${this.accuracy}`);
+      console.log("\nEquipped:");
+      this.weapon === ""
+        ? console.log("Weapon: None")
+        : console.log(`${this.weapon.name}`);
+      this.armour === ""
+        ? console.log("Armor: None")
+        : console.log(`${this.armour.name}`);
+
+      console.log("\nItems:");
+
+      if (this.items.length < 1) {
+        console.log("You have no items.");
+      } else {
+        for (const item of this.items) {
+          console.log(item.name);
+        }
+      }
+      console.log(`\nLevel ${this.level} ${this.player_class}`);
+      console.log(`XP to next level: ${this.#getXpToNextLevel() - this.xp}`);
+
+      const choice = prompt("\n[Back] -> ");
+      if (choice && choice.toLowerCase() === "back") {
+        this.back = true;
+        break;
+      }
+
+      console.log("Invalid input. Please type 'back' to return.");
+    }
+  }
+  //#endregion
+
+  //#region Flee Method
+  /**
+   * Handles the [Flee] option from the combat menu. Randomly
+   * determines if the monster blocks your flight attempt.
+   */
+  flee() {
+    this.back = false;
+    while (true) {
+      const flee_chance = HelperUtilities.getRandomInt(1, 10);
+      if (flee_chance > 4) {
+        prompt("\nYou scramble through the door behind you and flee! -> ");
+        prompt(
+          "\nYou find yourself in an unfamiliar room with one untried door. -> ",
+        );
+        //TODO: Room selector method
+        this.room_selector();
+      } else {
+        prompt("\nAs you turn to leave the monster blocks your exit!");
+        break;
+      }
+    }
+  }
+  //#endregion
+
+  //#region Level Up Method
+  /**
+   * Handles leveling up the player and increasing their stats
+   **/
+  levelUp() {
+    this.max_hp += 5;
+    this.strength += 2;
+    this.accuracy += 1;
+    this.stamina += 2;
+    this.maxMana += 5;
+    this.level += 1;
+    this.xp = 0;
+    prompt(`\n${this.name} has gained a level!`);
+  }
+  //#endregion
+
+  //#region Rest Method
+  /**
+   * Handles [Rest] option from main menu.
+   */
+  rest() {
+    let confirm = prompt(
+      "Are you sure you would like to rest? -> ",
+    ).toLowerCase();
+
+    if (confirm === "no") {
+      this.back = true;
+    } else {
+      const hours = HelperUtilities.getRandomInt(2, 6);
+      const manaRegained = hours * 3;
+      prompt(
+        `\nYou spread the threadbare bedroll from your backpack on the ground before you.
+        Moments after you lay down, you begin to doze off. ->`,
+      );
+      if (HelperUtilities.getRandomInt(0, 10) > 6) {
+        //TODO: Monster during rest method
+        this.monsterDuringRest();
+      }
+    }
+  }
+  //#endregion
+}
+
+export default Player;
