@@ -1,34 +1,7 @@
 import Monster from "./Monster";
 import HelperUtilities from "../Utils/Utils";
 import Item from "../Wearables/Item";
-
-//#region Player Config Interface
-export interface PlayerConfig {
-  name: string;
-  playerClass: string;
-  maxHp: number;
-  hp: number;
-  strength: number;
-  accuracy: number;
-  stamina: number;
-  maxMana: number;
-  mana: number;
-  equipment: string[];
-  items: string[];
-  stealableItems?: string[];
-  stealableWeapons?: string[];
-  stealableMagicItems?: string[];
-  gold: number;
-  xp: number;
-  back: boolean;
-  usedItem: boolean;
-  weapon: string;
-  armour: string;
-  combat: boolean;
-  special: number;
-  room: string;
-}
-//#endregion
+import { Equippable, PlayerConfig } from "../Data/interfaces";
 
 export class Player {
   // All public properties - Definite assignment assertion ! - Telling the compiler that this will be assigned before use
@@ -41,22 +14,21 @@ export class Player {
   stamina = 5;
   maxMana = 5;
   mana = 5;
-  equipment: Item[] = [];
+  equipment: Equippable[] = [];
   items: Item[] = [];
-  stealableItems: string[] = [];
-  stealableWeapons: string[] = [];
-  stealableMagicItems: string[] = [];
+  stealableItems: Equippable[] = [];
+  stealableWeapons: Equippable[] = [];
+  stealableMagicItems: Item[] = [];
   gold = 0;
   xp = 0;
   back = false;
   usedItem = false;
-  weapon = "None";
-  armour = "Cloth";
+  weapon = null;
+  armour = null;
   combat = false;
   special = 0;
   room = "start";
 
-  // Private field - could also use the private keyword
   private _level = 1;
 
   //#region Constructor
@@ -386,7 +358,7 @@ export class Player {
         console.log(`${index}. ${item.name}`);
       });
       try {
-        let choice = prompt(
+        const choice = prompt(
           `\nSelect an item with the corresponding number or [Back] -> `,
         ).toLowerCase();
 
@@ -394,7 +366,7 @@ export class Player {
           this.back = true;
           break;
         }
-        let intChoice = parseInt(choice);
+        const intChoice = parseInt(choice);
         if (
           this.weapon === this.equipment[intChoice].name ||
           this.armour === this.equipment[intChoice].name
@@ -404,7 +376,7 @@ export class Player {
           ).toLowerCase();
 
           if (confirm === "yes") {
-            this.equipment[intChoice].unequip();
+            this.equipment[intChoice].unequip(this);
             break;
           }
         } else {
@@ -412,7 +384,7 @@ export class Player {
             `Would you like to equip the ${this.equipment[intChoice].name}? -> `,
           ).toLowerCase();
           if (confirm === "yes") {
-            this.equipment[intChoice].equip();
+            this.equipment[intChoice].equip(this);
             break;
           }
         }
@@ -449,7 +421,7 @@ export class Player {
         let intChoice = parseInt(choice);
         let itemChoice = this.items[intChoice];
         let confirm = prompt(
-          `Wold you like to use ${this.items[intChoice].name}? -> `,
+          `Would you like to use ${this.items[intChoice].name}? -> `,
         ).toLowerCase();
         if (choice === "yes") {
           //NOTE: These conditionals are figuring out if the item chosen

@@ -1,12 +1,5 @@
-import HelperUtilities from "./Utils";
-
-export interface ItemConfig {
-  name: string;
-  hpToAdd?: number;
-  manaToAdd?: number;
-  damage?: number;
-  price?: number;
-}
+import HelperUtilities from "../Utils/Utils";
+import { ItemConfig } from "../Data/interfaces";
 
 export default class Item {
   name: string;
