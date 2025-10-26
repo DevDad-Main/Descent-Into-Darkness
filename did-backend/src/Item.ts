@@ -1,4 +1,4 @@
-import HelperUtilities from "./utils";
+import HelperUtilities from "./Utils";
 
 export interface ItemConfig {
   name: string;

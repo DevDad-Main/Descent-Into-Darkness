@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
-import Home from "./components/home";
+import GameInterface from "./components/GameInterface";
 
 function App() {
   return (
     <Suspense fallback={<p>Loading...</p>}>
       <>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<GameInterface />} />
         </Routes>
       </>
     </Suspense>

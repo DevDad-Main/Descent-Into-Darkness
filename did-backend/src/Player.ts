@@ -128,12 +128,6 @@ export class Player {
   }
   //#endregion
 
-  async helloWorld(text: string): Promise<void> {
-    const choice = (await this.prompt("Hello World -> ")).toLowerCase();
-    if (choice === "back") this.back = true;
-    this.io.output(text);
-  }
-
   //#region Attack Method
   /**
    * Attack method for fighter class.
